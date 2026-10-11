@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倉管條碼領料作業系統 (純正式 API 版)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- html5-qrcode Library for Mobile Camera Barcode Scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes pulse-border {
+
+            0%,
+            100% {
+                border-color: rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                border-color: rgba(34, 197, 94, 1);
+            }
+        }
+
+        .scanning-animation {
+            animation: pulse-border 1.5s infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/30">
+                    <i class="fa-solid fa-boxes-packing text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white tracking-wide">智慧倉管領料作業系統</h1>
+                    <p class="text-xs text-slate-400">雙階段掃碼核對與 ERP 待過帳紀錄</p>
+                </div>
+            </div>
+
+            <!-- Header Controls & Mode Status -->
+            <div class="flex items-center space-x-3">
+                <div id="modeBadge"
+                    class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <span id="modeStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                    <span id="modeText">正式營運模式 (ERP API)</span>
+                </div>
+
+                <button onclick="lockSystem()"
+                    class="p-2 text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors border border-amber-500/30"
+                    title="鎖定系統 / 登出">
+                    <i class="fa-solid fa-lock text-base"></i>
+                </button>
+
+                <button onclick="openSettingsModal()"
+                    class="p-2 text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors border border-slate-600/50"
+                    title="API Webhook 設定">
+                    <i class="fa-solid fa-gear text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Form Workflow (7 Cols on LG) -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Workflow Progress Tracker -->
+            <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 backdrop-blur-sm">
+                <div class="flex justify-between items-center text-xs font-medium text-slate-400">
+                    <div id="step1-indicator" class="flex items-center text-emerald-400 font-bold">
+                        <span
+                            class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center mr-2 text-xs">1</span>
+                        <span>掃描料號</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+                    <div id="step2-indicator" class="flex items-center">
+                        <span
+                            class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">2</span>
+                        <span>核對名稱規格</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+                    <div id="step3-indicator" class="flex items-center">
+                        <span
+                            class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">3</span>
+                        <span>輸入領用資訊</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 1: Scan Barcode & Query Material -->
+            <div class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                    <h2 class="text-base font-semibold text-white flex items-center">
+                        <i class="fa-solid fa-barcode text-emerald-400 mr-2.5"></i> 第一階段：掃描貨品條碼
+                    </h2>
+                    <span class="text-xs text-emerald-400 font-medium"><i class="fa-solid fa-bolt mr-1"></i>滿 8 碼 / 槍掃自動查詢</span>
+                </div>
+
+                <div class="space-y-3">
+                    <label for="itemBarcode" class="block text-sm font-medium text-slate-300">
+                        貨品編號 <span class="text-emerald-400">*</span>
+                    </label>
+                    <div class="relative flex flex-col sm:flex-row gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="itemBarcode" autofocus placeholder="請掃描或輸入 8 碼貨品編號 (滿8碼自動查詢)"
+                                class="w-full bg-slate-900 border-2 border-slate-600 rounded-xl px-4 py-3.5 pl-11 text-lg font-mono text-emerald-300 placeholder-slate-500 focus:outline-none transition-all scanning-animation"
+                                oninput="handleBarcodeInput(this)"
+                                onkeydown="handleBarcodeKeydown(event)">
+                            <i
+                                class="fa-solid fa-qrcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <!-- Mobile Camera Scan Button -->
+                            <button type="button" onclick="startCameraScanner()"
+                                class="flex-1 sm:flex-none bg-sky-600 hover:bg-sky-500 text-white px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center space-x-1.5 shadow-md">
+                                <i class="fa-solid fa-camera text-base"></i>
+                                <span>鏡頭掃碼</span>
+                            </button>
+                            <!-- Query Button -->
+                            <button type="button" onclick="queryMaterial()" id="btnQuery"
+                                class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center space-x-1.5 shadow-md">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>查詢</span>
+                            </button>
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-emerald-400/80 -mt-1 block flex items-center">
+                        <i class="fa-solid fa-bolt mr-1"></i> 輸入或掃描滿 8 碼自動觸發查詢，亦可按 Enter 或點擊查詢
+                    </span>
+                    <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+                        <span id="apiStatusNotice" class="text-slate-400"><i
+                                class="fa-solid fa-network-wire mr-1"></i>連線 API: <span id="apiEndpointState"
+                                class="text-emerald-400 font-medium">檢測中...</span></span>
+                        <span id="scanFeedback" class="hidden text-emerald-400 font-semibold"><i
+                                class="fa-solid fa-circle-check"></i> 掃描完成</span>
+                    </div>
+                </div>
+
+                <!-- Material Info Result Card (Verified Display) -->
+                <div id="materialCard"
+                    class="hidden mt-4 bg-slate-900/90 rounded-xl p-4 border border-emerald-500/40 space-y-3 transition-all">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span
+                                class="bg-emerald-500 text-slate-950 font-bold px-2.5 py-0.5 rounded text-xs">已核對</span>
+                            <span id="displayBarcode" class="font-mono text-slate-400 text-sm">#--</span>
+                        </div>
+                        <button onclick="resetStage1()"
+                            class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
+                            <i class="fa-solid fa-rotate-left mr-1"></i>重掃料號
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                        <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-400 block mb-0.5">物料名稱</span>
+                            <p id="displayName" class="text-base font-bold text-white">---</p>
+                        </div>
+                        <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-400 block mb-0.5">規格說明</span>
+                            <p id="displaySpec" class="text-base font-medium text-slate-200">---</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between text-xs text-slate-400 px-1 pt-1 border-t border-slate-800">
+                        <span>單位：<strong id="displayUnit" class="text-slate-200">個</strong></span>
+                        <span>系統現有庫存：<strong id="displayStock"
+                                class="text-emerald-400 font-mono text-sm">--</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2: Issue Details Input Form -->
+            <div id="stage2Container"
+                class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-5 opacity-50 pointer-events-none transition-all">
+                <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                    <h2 class="text-base font-semibold text-white flex items-center">
+                        <i class="fa-solid fa-clipboard-list text-emerald-400 mr-2.5"></i> 第二階段：填寫領用詳細資訊
+                    </h2>
+                    <span class="text-xs text-slate-400">請確認物料正確後輸入</span>
+                </div>
+
+                <form id="issueForm" onsubmit="submitMaterialIssue(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <!-- 領用數量 (含單位標示) -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-slate-300 mb-1.5">
+                                領用數量 <span class="text-emerald-400">*</span>
+                            </label>
+                            <div class="relative flex items-center">
+                                <input type="number" id="quantity" min="1" step="1" required placeholder="例如: 10"
+                                    class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 pl-10 pr-24 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                    onkeydown="handleFormKeydown(event, 'shipNo')">
+                                <i
+                                    class="fa-solid fa-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+
+                                <div
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center space-x-1 pointer-events-none bg-slate-800 border border-slate-700 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">
+                                    <span class="text-slate-400 text-[11px]">單位:</span>
+                                    <span id="quantityUnit" class="font-mono text-emerald-300">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 船號 -->
+                        <div>
+                            <label for="shipNo" class="block text-sm font-medium text-slate-300 mb-1.5">
+                                船號 / 工程號 <span class="text-emerald-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="shipNo" required placeholder="例如: 56011 (滿 5 碼自動跳欄)"
+                                    class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 pl-10 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                    oninput="handleShipNoAutoJump(this)"
+                                    onkeydown="handleFormKeydown(event, 'jobCode')">
+                                <i
+                                    class="fa-solid fa-ship absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            </div>
+                            <span class="text-[11px] text-emerald-400/80 mt-1 block flex items-center">
+                                <i class="fa-solid fa-bolt mr-1"></i> 輸入或掃描滿 5 碼自動跳轉下一步
+                            </span>
+                        </div>
+
+                        <!-- 工作代號 -->
+                        <div>
+                            <label for="jobCode" class="block text-sm font-medium text-slate-300 mb-1.5">
+                                工作代號 / 工單號 <span class="text-emerald-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="jobCode" required placeholder="例如: 4100 (滿 4 碼自動跳欄)"
+                                    class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 pl-10 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                    oninput="handleJobCodeAutoJump(this)"
+                                    onkeydown="handleFormKeydown(event, 'recipientId')">
+                                <i
+                                    class="fa-solid fa-briefcase absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            </div>
+                            <span class="text-[11px] text-emerald-400/80 mt-1 block flex items-center">
+                                <i class="fa-solid fa-bolt mr-1"></i> 輸入或掃描滿 4 碼自動跳轉下一步
+                            </span>
+                        </div>
+
+                        <!-- 領用人 / 工號條碼 (保留雙向支援) -->
+                        <div>
+                            <label for="recipientId" class="block text-sm font-medium text-slate-300 mb-1.5">
+                                領用人 / 工號條碼 <span class="text-emerald-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="recipientId" required placeholder="請輸入或掃描領用人/工號 (如: 1037)"
+                                    class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 pl-10 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <i
+                                    class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-2 flex items-center space-x-3">
+                        <button type="submit" id="btnSubmit"
+                            class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-3 px-6 rounded-xl font-bold shadow-lg shadow-emerald-900/30 transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>確認無誤，送出領料登錄</span>
+                        </button>
+                        <button type="button" onclick="resetForm()"
+                            class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-sm transition-colors">
+                            重置
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Today's Issue Records (5 Cols on LG) -->
+        <div class="lg:col-span-5 space-y-6">
+            <div
+                class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-xl flex flex-col h-full min-h-[500px]">
+
+                <div class="flex items-center justify-between pb-4 border-b border-slate-700/60 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i>
+                        <h2 class="text-base font-semibold text-white">本日現場領料紀錄</h2>
+                    </div>
+                    <span id="logCount"
+                        class="bg-slate-700 text-emerald-400 font-mono text-xs font-bold px-2.5 py-1 rounded-full">
+                        0 筆紀錄
+                    </span>
+                </div>
+
+                <!-- Record List Container -->
+                <div id="logList" class="space-y-3 overflow-y-auto max-h-[580px] pr-1 flex-1">
+                    <!-- Dynamic Log Items Rendered Here -->
+                </div>
+
+                <div
+                    class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between items-center">
+                    <span>每日 16:45 自動轉轉入 ERP</span>
+                    <button onclick="clearLocalLogs()"
+                        class="text-slate-500 hover:text-slate-300 transition-colors">清空畫面紀錄</button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal (n8n Webhook Configuration) -->
+    <div id="settingsModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-plug text-emerald-400 mr-2"></i> 正式版 API Webhook 端點設定
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/80 space-y-1">
+                    <p class="font-medium text-emerald-400 text-xs flex items-center">
+                        <i class="fa-solid fa-shield-check mr-1.5"></i> 企業 ERP 正式連線機制
+                    </p>
+                    <p class="text-[11px] text-slate-400">所有身份驗證與領料過帳皆直連 n8n / ERP 伺服器端點。</p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-300">階段零：密碼驗證 API URL <span
+                            class="text-emerald-400">*</span></label>
+                    <input type="url" id="webhookAuthUrl" placeholder="https://your-n8n.com/webhook/verify-password"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-300">階段一：物料查詢 API URL <span
+                            class="text-emerald-400">*</span></label>
+                    <input type="url" id="webhookQueryUrl" placeholder="https://your-n8n.com/webhook/scan-item"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-300">階段二：領料過帳 API URL <span
+                            class="text-emerald-400">*</span></label>
+                    <input type="url" id="webhookSubmitUrl" placeholder="https://your-n8n.com/webhook/submit-issue"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end space-x-2">
+                <button onclick="saveSettings()"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">
+                    儲存系統 API 設定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Authentication Overlay Modal -->
+    <div id="authModal"
+        class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-slate-800 border border-slate-700/80 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 text-center relative overflow-hidden">
+            <div
+                class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none">
+            </div>
+
+            <div
+                class="inline-flex p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-1">
+                <i class="fa-solid fa-shield-halved text-3xl"></i>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-white tracking-wide">智慧倉管領料作業系統</h2>
+                <p class="text-xs text-slate-400 mt-1">請輸入操作員安全密碼以開啟領料系統</p>
+            </div>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4 text-left">
+                <div>
+                    <label for="systemPassword" class="block text-xs font-medium text-slate-300 mb-1.5">
+                        授權操作密碼 <span class="text-emerald-400">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="systemPassword" autofocus required placeholder="請輸入進入密碼"
+                            class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 pl-11 pr-10 text-white font-mono placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-all">
+                        <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <button type="button" onclick="togglePasswordVisibility()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                            <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="authErrorMsg"
+                    class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg flex items-center">
+                    <i class="fa-solid fa-circle-exclamation mr-2 text-sm flex-shrink-0"></i>
+                    <span id="authErrorText">密碼驗證失敗，請重新輸入！</span>
+                </div>
+
+                <button type="submit" id="btnAuthSubmit"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg shadow-emerald-900/30 transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>驗證登入作業系統</span>
+                </button>
+            </form>
+
+            <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-500">
+                <span><i class="fa-solid fa-lock mr-1"></i> 正式安全驗證通道</span>
+                <button type="button" onclick="openSettingsModal()"
+                    class="text-slate-400 hover:text-slate-200 underline flex items-center">
+                    <i class="fa-solid fa-gear mr-1"></i> 設定 API Webhook
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast"
+        class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out pointer-events-none">
+        <div id="toastContent"
+            class="bg-slate-800 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl flex items-center space-x-3">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <span id="toastMessage" class="text-sm font-medium">通知訊息</span>
+        </div>
+    </div>
+
+    <!-- Mobile Camera Scanner Overlay Modal -->
+    <div id="cameraModal"
+        class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex flex-col items-center justify-between p-4 hidden">
+        <div class="w-full max-w-md flex items-center justify-between py-2 text-white border-b border-slate-800">
+            <span class="text-sm font-bold flex items-center"><i class="fa-solid fa-camera text-sky-400 mr-2"></i>
+                行動相機條碼/QR Code 掃描</span>
+            <button type="button" onclick="stopCameraScanner()" class="p-2 text-slate-400 hover:text-white rounded-lg">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="w-full max-w-md my-auto flex flex-col items-center justify-center relative">
+            <div id="reader" class="w-full rounded-2xl overflow-hidden border-2 border-sky-500 shadow-2xl bg-black">
+            </div>
+            <p class="text-xs text-slate-300 mt-3 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-700">
+                <i class="fa-solid fa-expand mr-1 text-sky-400"></i> 請將條碼或二維碼對準畫面中央
+            </p>
+        </div>
+
+        <div class="w-full max-w-md pb-4 text-center">
+            <button type="button" onclick="stopCameraScanner()"
+                class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 rounded-xl border border-slate-700 transition-colors">
+                取消掃描
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // System Global State Variables
+        let webhookAuthUrl = '';
+        let webhookQueryUrl = '';
+        let webhookSubmitUrl = '';
+
+        let currentMaterial = null;
+        let issueLogs = [];
+        let html5QrCodeScanner = null;
+
+        // Web Audio & Mobile Vibration Feedback Synthesizer
+        let audioCtx = null;
+
+        function triggerMobileVibration(pattern = [100]) {
+            if ('vibrate' in navigator) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch (e) {
+                    console.log('Vibration API error:', e);
+                }
+            }
+        }
+
+        function playBeep(type = 'success') {
+            try {
+                if (type === 'success') {
+                    triggerMobileVibration([80]);
+                } else if (type === 'error') {
+                    triggerMobileVibration([150, 80, 150]);
+                }
+
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio Feedback Error:', e);
+            }
+        }
+
+        // Camera Barcode Scanning Handler
+        async function startCameraScanner() {
+            const modal = document.getElementById('cameraModal');
+            modal.classList.remove('hidden');
+
+            if (!html5QrCodeScanner) {
+                html5QrCodeScanner = new Html5Qrcode("reader");
+            }
+
+            const config = {
+                fps: 15,
+                qrbox: { width: 260, height: 180 },
+                aspectRatio: 1.0
+            };
+
+            try {
+                // Prefer back camera for scanning outdoor material tags
+                await html5QrCodeScanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    onCameraScanSuccess
+                );
+            } catch (err) {
+                console.error("Camera start failed:", err);
+                showToast("無法開啟相機，請確認權限或選擇鏡頭！", "error");
+                stopCameraScanner();
+            }
+        }
+
+        function onCameraScanSuccess(decodedText, decodedResult) {
+            playBeep('success');
+            stopCameraScanner();
+
+            const barcodeInput = document.getElementById('itemBarcode');
+            if (barcodeInput) {
+                barcodeInput.value = decodedText.trim();
+                queryMaterial(); // Auto query after mobile camera scan
+            }
+        }
+
+        async function stopCameraScanner() {
+            const modal = document.getElementById('cameraModal');
+            modal.classList.add('hidden');
+
+            if (html5QrCodeScanner && html5QrCodeScanner.isScanning) {
+                try {
+                    await html5QrCodeScanner.stop();
+                } catch (e) {
+                    console.log("Camera stop error:", e);
+                }
+            }
+        }
+
+        window.onload = function () {
+            loadSavedSettings();
+            renderLogs();
+            checkAuthenticationState();
+        };
+
+        function checkAuthenticationState() {
+            const authModal = document.getElementById('authModal');
+            const isAuth = sessionStorage.getItem('isSystemAuthenticated') === 'true';
+
+            if (isAuth) {
+                authModal.classList.add('hidden');
+                focusBarcodeField();
+            } else {
+                authModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('systemPassword')?.focus();
+                }, 200);
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('systemPassword');
+            const password = passwordInput.value.trim();
+            const errorBox = document.getElementById('authErrorMsg');
+            const errorText = document.getElementById('authErrorText');
+            const btnAuthSubmit = document.getElementById('btnAuthSubmit');
+
+            if (!password) return;
+
+            if (!webhookAuthUrl) {
+                showToast('請先點擊右下角設定「密碼驗證 Webhook URL」！', 'error');
+                playBeep('error');
+                openSettingsModal();
+                return;
+            }
+
+            btnAuthSubmit.disabled = true;
+            btnAuthSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> 驗證中...`;
+            errorBox.classList.add('hidden');
+
+            try {
+                const res = await fetch(webhookAuthUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password, timestamp: new Date().toISOString() })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`伺服器回應錯誤 (${res.status})`);
+                }
+
+                const data = await res.json();
+
+                if (data && (data.success === true || data.status === 'ok' || data.authorized === true)) {
+                    sessionStorage.setItem('isSystemAuthenticated', 'true');
+                    document.getElementById('authModal').classList.add('hidden');
+                    passwordInput.value = '';
+                    playBeep('success');
+                    showToast('身份驗證成功，進入領料作業系統', 'success');
+                    focusBarcodeField();
+                } else {
+                    throw new Error(data.message || '授權密碼錯誤，請重新輸入！');
+                }
+
+            } catch (err) {
+                playBeep('error');
+                errorText.textContent = err.message || '密碼驗證失敗，請檢查網絡或端點設定！';
+                errorBox.classList.remove('hidden');
+                passwordInput.select();
+            } finally {
+                btnAuthSubmit.disabled = false;
+                btnAuthSubmit.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> <span>驗證登入作業系統</span>`;
+            }
+        }
+
+        function lockSystem() {
+            sessionStorage.removeItem('isSystemAuthenticated');
+            checkAuthenticationState();
+            showToast('系統已鎖定登出', 'info');
+        }
+
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('systemPassword');
+            const eye = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                eye.className = 'fa-solid fa-eye-slash text-xs';
+            } else {
+                pwd.type = 'password';
+                eye.className = 'fa-solid fa-eye text-xs';
+            }
+        }
+
+        let barcodeQueryTimer = null;
+        let isQueryingMaterial = false;
+
+        // 當貨品編號達到 8 碼時自動查詢（支援鍵盤鍵入、條碼槍掃描、貼上）
+        function handleBarcodeInput(input) {
+            const barcode = input.value.trim();
+            if (barcode.length >= 8) {
+                if (barcodeQueryTimer) {
+                    clearTimeout(barcodeQueryTimer);
+                }
+                // 微延遲 80ms 確保條碼槍訊號或快速輸入完整，並防抖動
+                barcodeQueryTimer = setTimeout(() => {
+                    if (!isQueryingMaterial) {
+                        queryMaterial();
+                    }
+                }, 80);
+            }
+        }
+
+        function handleBarcodeKeydown(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (barcodeQueryTimer) {
+                    clearTimeout(barcodeQueryTimer);
+                    barcodeQueryTimer = null;
+                }
+                if (!isQueryingMaterial) {
+                    queryMaterial();
+                }
+            }
+        }
+
+        // Helper: Robust Specification Extractor (Checks all Google Sheet / n8n Keys)
+        function extractSpec(data) {
+            if (!data) return '無規格說明';
+            const specCandidate = data['貨品規格'] || data['規格'] || data['規格說明'] || data['物料規格'] || data.itemSpec || data.spec || data.specification || data['Spec'];
+            if (specCandidate !== undefined && specCandidate !== null && String(specCandidate).trim() !== '') {
+                return String(specCandidate).trim();
+            }
+            return '無規格說明';
+        }
+
+        // Helper: Robust Stock Extractor (Supports 'stock', '目前存量', 'currentStock', etc.)
+        function extractStock(data) {
+            if (!data) return '--';
+            const candidates = [
+                data['目前存量'],
+                data.stock,
+                data['庫存數量'],
+                data['現有庫存'],
+                data.currentStock,
+                data.stockQty,
+                data['庫存'],
+                data.qty
+            ];
+            for (const val of candidates) {
+                if (val !== undefined && val !== null && val !== '') {
+                    return val;
+                }
+            }
+            return '--';
+        }
+
+        async function queryMaterial() {
+            if (isQueryingMaterial) return;
+
+            const barcodeInput = document.getElementById('itemBarcode');
+            const barcode = barcodeInput.value.trim();
+
+            if (!barcode) {
+                showToast('請先輸入或掃描貨品編號！', 'warning');
+                playBeep('error');
+                return;
+            }
+
+            if (!webhookQueryUrl) {
+                showToast('請先設定「物料查詢 Webhook URL」！', 'error');
+                playBeep('error');
+                openSettingsModal();
+                return;
+            }
+
+            isQueryingMaterial = true;
+            const btnQuery = document.getElementById('btnQuery');
+            if (btnQuery) {
+                btnQuery.disabled = true;
+                btnQuery.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            }
+
+            try {
+                const res = await fetch(webhookQueryUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemBarcode: barcode, "貨品編號": barcode, queryTime: new Date().toISOString() })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`物料查詢 API 回傳異常 (${res.status})`);
+                }
+
+                const data = await res.json();
+
+                if (data && (data.success || data.data || data['貨品名稱'] || data['物料名稱'] || data.itemName || data['品名'])) {
+                    const material = data.data || data;
+                    currentMaterial = material;
+
+                    const barcodeVal = material['貨品編號'] || material.itemBarcode || material['料號'] || barcode;
+                    const nameVal = material['貨品名稱'] || material['物料名稱'] || material.itemName || material['品名'] || '未知物料';
+                    const specVal = extractSpec(material);
+                    const unitVal = material['基本單位'] || material['單位'] || material.unit || '個';
+                    const stockVal = extractStock(material);
+
+                    document.getElementById('displayBarcode').textContent = `#${barcodeVal}`;
+                    document.getElementById('displayName').textContent = nameVal;
+                    document.getElementById('displaySpec').textContent = specVal;
+                    document.getElementById('displayUnit').textContent = unitVal;
+                    document.getElementById('displayStock').textContent = stockVal;
+
+                    document.getElementById('quantityUnit').textContent = unitVal;
+                    document.getElementById('materialCard').classList.remove('hidden');
+
+                    unlockStage2();
+                    setStepProgress(2);
+                    playBeep('success');
+                    showToast('物料查詢成功，請核對名稱與規格', 'success');
+
+                } else {
+                    throw new Error(data.message || `總物料清單查無此貨品編號 [${barcode}]`);
+                }
+
+            } catch (err) {
+                playBeep('error');
+                showToast(err.message, 'error');
+                resetStage1UI();
+            } finally {
+                isQueryingMaterial = false;
+                if (btnQuery) {
+                    btnQuery.disabled = false;
+                    btnQuery.innerHTML = `<i class="fa-solid fa-magnifying-glass mr-1.5"></i> 查詢`;
+                }
+            }
+        }
+
+        function unlockStage2() {
+            const stage2 = document.getElementById('stage2Container');
+            stage2.classList.remove('opacity-50', 'pointer-events-none');
+            setTimeout(() => {
+                const qtyInput = document.getElementById('quantity');
+                if (qtyInput) {
+                    qtyInput.focus();
+                    qtyInput.select();
+                }
+            }, 100);
+        }
+
+        function resetStage1() {
+            if (barcodeQueryTimer) {
+                clearTimeout(barcodeQueryTimer);
+                barcodeQueryTimer = null;
+            }
+            currentMaterial = null;
+            document.getElementById('materialCard').classList.add('hidden');
+            document.getElementById('itemBarcode').value = '';
+            document.getElementById('quantityUnit').textContent = '--';
+
+            const stage2 = document.getElementById('stage2Container');
+            stage2.classList.add('opacity-50', 'pointer-events-none');
+
+            setStepProgress(1);
+            focusBarcodeField();
+        }
+
+        function resetStage1UI() {
+            currentMaterial = null;
+            document.getElementById('materialCard').classList.add('hidden');
+            document.getElementById('quantityUnit').textContent = '--';
+            const stage2 = document.getElementById('stage2Container');
+            stage2.classList.add('opacity-50', 'pointer-events-none');
+            setStepProgress(1);
+        }
+
+        function handleShipNoAutoJump(input) {
+            if (input.value.trim().length >= 5) {
+                const jobCodeInput = document.getElementById('jobCode');
+                if (jobCodeInput) {
+                    jobCodeInput.focus();
+                    jobCodeInput.select();
+                }
+            }
+        }
+
+        function handleJobCodeAutoJump(input) {
+            if (input.value.trim().length >= 4) {
+                const recipientInput = document.getElementById('recipientId');
+                if (recipientInput) {
+                    recipientInput.focus();
+                    recipientInput.select();
+                }
+            }
+        }
+
+        function handleFormKeydown(e, nextId) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const nextEl = document.getElementById(nextId);
+                if (nextEl) {
+                    nextEl.focus();
+                    if (nextEl.select) nextEl.select();
+                }
+            }
+        }
+
+        async function submitMaterialIssue(e) {
+            e.preventDefault();
+
+            if (!currentMaterial) {
+                showToast('請先完成第一階段物料掃描與核對！', 'error');
+                return;
+            }
+
+            if (!webhookSubmitUrl) {
+                showToast('請先設定「領料過帳 Webhook URL」！', 'error');
+                playBeep('error');
+                openSettingsModal();
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value, 10);
+            const shipNo = document.getElementById('shipNo').value.trim();
+            const jobCode = document.getElementById('jobCode').value.trim();
+            const recipientId = document.getElementById('recipientId').value.trim();
+
+            if (!quantity || !shipNo || !jobCode || !recipientId) {
+                showToast('請填寫完整領用欄位！', 'warning');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> 寫入中...`;
+
+            const barcodeVal = currentMaterial['貨品編號'] || currentMaterial.itemBarcode || document.getElementById('itemBarcode').value;
+            const nameVal = currentMaterial['貨品名稱'] || currentMaterial['物料名稱'] || currentMaterial.itemName || '';
+            const specVal = extractSpec(currentMaterial);
+            const rawSpecVal = (specVal === '無規格說明') ? '' : specVal;
+            const unitVal = currentMaterial['基本單位'] || currentMaterial['單位'] || currentMaterial.unit || 'EA';
+            const timestampVal = new Date().toLocaleString('zh-TW', { hour12: false });
+
+            // 對應 n8n 及 Excel/Google Sheets 標準欄位 Payload
+            const payload = {
+                "時間": timestampVal,
+                "船號": shipNo,
+                "工作代號": jobCode,
+                "貨品編號": barcodeVal,
+                "貨品名稱": nameVal,
+                "物料名稱": nameVal,
+                "貨品規格": rawSpecVal,
+                "規格說明": rawSpecVal,
+                "規格": rawSpecVal,
+                "領用數量": quantity,
+                "領用量": quantity,
+                "單位": unitVal,
+                "領用人": recipientId,
+                "狀態": '待過帳',
+
+                // 英文別名完整相容
+                timestamp: timestampVal,
+                shipNo: shipNo,
+                jobCode: jobCode,
+                itemBarcode: barcodeVal,
+                itemName: nameVal,
+                itemSpec: rawSpecVal,
+                spec: rawSpecVal,
+                quantity: quantity,
+                unit: unitVal,
+                recipientId: recipientId,
+                status: '待過帳'
+            };
+
+            try {
+                const res = await fetch(webhookSubmitUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`領料過帳失敗，伺服器回應狀態 ${res.status}`);
+                }
+
+                addLogEntry(payload);
+                playBeep('success');
+                showToast('✅ 領料紀錄寫入成功！已同步至 ERP 系統', 'success');
+                resetForm();
+
+            } catch (err) {
+                playBeep('error');
+                showToast(`過帳失敗: ${err.message}`, 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認無誤，送出領料登錄</span>`;
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('issueForm').reset();
+            resetStage1();
+        }
+
+        function focusBarcodeField() {
+            setTimeout(() => {
+                const el = document.getElementById('itemBarcode');
+                if (el) {
+                    el.focus();
+                    el.select();
+                }
+            }, 100);
+        }
+
+        function addLogEntry(entry) {
+            issueLogs.unshift(entry);
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const logList = document.getElementById('logList');
+            const logCount = document.getElementById('logCount');
+
+            if (!logList) return;
+
+            if (logCount) {
+                logCount.textContent = `${issueLogs.length} 筆紀錄`;
+            }
+
+            if (issueLogs.length === 0) {
+                logList.innerHTML = `
+                    <div id="emptyLogState" class="text-center py-16 text-slate-500">
+                        <i class="fa-solid fa-inbox text-4xl mb-3 block opacity-40"></i>
+                        <p class="text-sm">尚無領料紀錄</p>
+                        <p class="text-xs text-slate-600 mt-1">請於左側完成雙階段掃碼登錄</p>
+                    </div>`;
+                return;
+            }
+
+            logList.innerHTML = issueLogs.map((item) => {
+                const timeStr = item['時間'] || item.timestamp || '';
+                const displayTime = timeStr.includes(' ') ? timeStr.split(' ')[1] : timeStr;
+                const barcode = item['貨品編號'] || item.itemBarcode || '';
+                const name = item['貨品名稱'] || item['物料名稱'] || item.itemName || '';
+                const spec = item['貨品規格'] || item['規格說明'] || item.itemSpec || '無規格說明';
+                const qty = item['領用數量'] ?? item['領用量'] ?? item.quantity ?? '';
+                const unit = item['單位'] || item.unit || '';
+                const recipient = item['領用人'] || item.recipientId || '';
+                const ship = item['船號'] || item.shipNo || '';
+                const job = item['工作代號'] || item.jobCode || '';
+                const status = item['狀態'] || item.status || '待過帳';
+
+                return `
+                <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-700/60 shadow space-y-2 text-xs transition-all hover:border-slate-600">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono text-emerald-400 font-bold">#${barcode}</span>
+                            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono text-[11px]">${displayTime}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            ${status}
+                        </span>
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-bold text-white">${name}</p>
+                        <p class="text-slate-400 text-[11px]">${spec}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1 text-slate-300 bg-slate-800/40 p-2 rounded-lg">
+                        <div>領用數量：<strong class="text-emerald-400 font-mono text-sm">${qty} ${unit ? `<span class="text-xs text-slate-400 font-normal">(${unit})</span>` : ''}</strong></div>
+                        <div>領用人：<strong>${recipient}</strong></div>
+                        <div>船號：<strong>${ship}</strong></div>
+                        <div>工作代號：<strong>${job}</strong></div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function clearLocalLogs() {
+            issueLogs = [];
+            renderLogs();
+            showToast('已清空當前畫面的歷史紀錄', 'info');
+        }
+
+        function setStepProgress(step) {
+            const s1 = document.getElementById('step1-indicator');
+            const s2 = document.getElementById('step2-indicator');
+            const s3 = document.getElementById('step3-indicator');
+
+            if (s1) s1.className = 'flex items-center ' + (step >= 1 ? 'text-emerald-400 font-bold' : 'text-slate-500');
+            if (s2) s2.className = 'flex items-center ' + (step >= 2 ? 'text-emerald-400 font-bold' : 'text-slate-500');
+            if (s3) s3.className = 'flex items-center ' + (step >= 3 ? 'text-emerald-400 font-bold' : 'text-slate-500');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveSettings() {
+
+
+            updateModeBadge();
+            closeSettingsModal();
+            showToast('正式版 Webhook 設定已儲存！', 'success');
+        }
+
+        function loadSavedSettings() {
+            webhookAuthUrl = 'https://learning.n8n.tw/webhook/a9e6f3a6-d119-4421-b141-5959d18f3c86';
+            webhookQueryUrl = 'https://learning.n8n.tw/webhook/bb7ea40d-f797-4ec8-8e3b-6f38972c6eb5';
+            webhookSubmitUrl = 'https://learning.n8n.tw/webhook/a1492fef-4a20-4d35-b376-c7f348eada98';
+
+
+            updateModeBadge();
+        }
+
+        function updateModeBadge() {
+            const badge = document.getElementById('modeBadge');
+            const text = document.getElementById('modeText');
+            const dot = document.getElementById('modeStatusDot');
+            const apiState = document.getElementById('apiEndpointState');
+
+            const isConfigured = webhookAuthUrl && webhookQueryUrl && webhookSubmitUrl;
+
+            if (isConfigured) {
+                if (badge) badge.className = 'flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse';
+                if (text) text.textContent = '正式營運模式 (ERP API)';
+                if (apiState) {
+                    apiState.textContent = '連線就緒';
+                    apiState.className = 'text-emerald-400 font-medium';
+                }
+            } else {
+                if (badge) badge.className = 'flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30';
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-400 mr-2';
+                if (text) text.textContent = '未設定 API Webhook';
+                if (apiState) {
+                    apiState.textContent = '未設定端點';
+                    apiState.className = 'text-rose-400 font-medium';
+                }
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toastContent');
+            const icon = document.getElementById('toastIcon');
+            const message = document.getElementById('toastMessage');
+
+            if (!toast || !content || !icon || !message) return;
+
+            message.textContent = msg;
+
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+                content.className = 'bg-slate-800 text-white px-4 py-3 rounded-xl border border-emerald-500/50 shadow-2xl flex items-center space-x-3';
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-xmark text-rose-400 text-lg';
+                content.className = 'bg-slate-800 text-white px-4 py-3 rounded-xl border border-rose-500/50 shadow-2xl flex items-center space-x-3';
+            } else if (type === 'warning') {
+                icon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-lg';
+                content.className = 'bg-slate-800 text-white px-4 py-3 rounded-xl border border-amber-500/50 shadow-2xl flex items-center space-x-3';
+            } else {
+                icon.className = 'fa-solid fa-circle-info text-sky-400 text-lg';
+                content.className = 'bg-slate-800 text-white px-4 py-3 rounded-xl border border-sky-500/50 shadow-2xl flex items-center space-x-3';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
