@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧倉管領料作業系統 (多操作員防呆版)</title>
+    <title>智慧倉管領料作業系統 (正式生產版)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons CDN -->
@@ -63,7 +63,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold text-white tracking-wide">智慧倉管領料作業系統</h1>
-                    <p class="text-xs text-slate-400">多操作員辨識 ➔ 依序輸入基本資料 ➔ 掃描料號 ➔ 數量過帳</p>
+                    <p class="text-xs text-slate-400">多操作員授權 ➔ 基本資料輸入 ➔ 條碼掃描 ➔ 數量過帳</p>
                 </div>
             </div>
 
@@ -78,7 +78,7 @@
                 <div id="modeBadge"
                     class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                     <span id="modeStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-                    <span id="modeText">正式營運模式 (已內建 n8n API)</span>
+                    <span id="modeText">正式生產營運模式</span>
                 </div>
 
                 <button onclick="lockSystem()"
@@ -89,7 +89,7 @@
 
                 <button onclick="openSettingsModal()"
                     class="p-2 text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors border border-slate-600/50"
-                    title="API Webhook 設定 (檢視)">
+                    title="API 連線設定">
                     <i class="fa-solid fa-gear text-base"></i>
                 </button>
             </div>
@@ -138,7 +138,7 @@
                                 船號 / 工程號 <span class="text-emerald-400">*</span>
                             </label>
                             <div class="relative">
-                                <input type="text" id="shipNo" required autofocus placeholder="例如: 56011 (滿5碼自動跳)"
+                                <input type="text" id="shipNo" required autofocus placeholder="請輸入船號 (滿5碼自動跳)"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     oninput="handleShipNoAutoJump(this)"
                                     onkeydown="handleHeaderKeydown(event, 'jobCode')">
@@ -152,7 +152,7 @@
                                 工作代號 / 工單號 <span class="text-emerald-400">*</span>
                             </label>
                             <div class="relative">
-                                <input type="text" id="jobCode" required placeholder="例如: 4100 (滿4碼自動跳)"
+                                <input type="text" id="jobCode" required placeholder="請輸入工單號 (滿4碼自動跳)"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     oninput="handleJobCodeAutoJump(this)"
                                     onkeydown="handleHeaderKeydown(event, 'recipientId')">
@@ -166,7 +166,7 @@
                                 領用人 / 工號條碼 <span class="text-emerald-400">*</span>
                             </label>
                             <div class="relative">
-                                <input type="text" id="recipientId" required placeholder="例如: 1037"
+                                <input type="text" id="recipientId" required placeholder="請輸入領用人工號"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     onkeydown="handleHeaderKeydown(event, 'btnLockHeader')">
                                 <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -185,7 +185,7 @@
                             <button type="button" id="btnNewShipSession" onclick="resetForNewShipSession()" style="display: none;"
                                 class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center space-x-1.5" title="快捷鍵: 空白鍵 (Space)">
                                 <i class="fa-solid fa-rotate"></i>
-                                <span>重置(空白鍵)</span>
+                                <span>重置作業</span>
                             </button>
                             <button type="submit" id="btnLockHeader"
                                 class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center space-x-2">
@@ -197,7 +197,6 @@
                 </form>
             </div>
 
-            <!-- STAGE 2 & 3: Scan Barcode, Verify Material & Issue Quantity -->
             <div id="stage2Container" class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-5 opacity-50 pointer-events-none transition-all">
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                     <h2 class="text-base font-semibold text-white flex items-center">
@@ -274,7 +273,7 @@
                             領用數量 <span class="text-emerald-400">*</span>
                         </label>
                         <div class="relative flex items-center">
-                            <input type="number" id="quantity" min="1" step="1" required placeholder="例如: 10"
+                            <input type="number" id="quantity" min="1" step="1" required placeholder="請輸入領用數量"
                                 oninput="validateQuantity()"
                                 class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 pr-24 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-lg font-mono">
                             <i class="fa-solid fa-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -304,7 +303,6 @@
 
         </div>
 
-        <!-- Right Column: Today's Issue Records (5 Cols on LG) -->
         <div class="lg:col-span-5 space-y-6">
             <div class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-xl flex flex-col h-full min-h-[500px]">
 
@@ -325,7 +323,7 @@
                 </div>
 
                 <div class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between items-center">
-                    <span>每日 16:45 自動轉入 ERP</span>
+                    <span>每日定時自動轉入 ERP</span>
                     <button onclick="clearLocalLogs()" class="text-slate-500 hover:text-slate-300 transition-colors">清空畫面紀錄</button>
                 </div>
 
@@ -334,12 +332,12 @@
 
     </main>
 
-    <!-- Settings Modal (n8n Webhook Configuration - View/Edit) -->
+    <!-- Settings Modal (API Webhook Configuration) -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                 <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-plug text-emerald-400 mr-2"></i> n8n API Webhook 設定 (已內建)
+                    <i class="fa-solid fa-plug text-emerald-400 mr-2"></i> API Webhook 設定
                 </h3>
                 <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -349,9 +347,9 @@
             <div class="space-y-4 text-sm">
                 <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/80 space-y-1">
                     <p class="font-medium text-emerald-400 text-xs flex items-center">
-                        <i class="fa-solid fa-shield-check mr-1.5"></i> 系統已直接寫死三組 n8n 正式網址
+                        <i class="fa-solid fa-shield-check mr-1.5"></i> 正式生產環境連線端點
                     </p>
-                    <p class="text-[11px] text-slate-400">系統已自動套用，若有需要亦可在此檢視或微調。</p>
+                    <p class="text-[11px] text-slate-400">系統已連接至正式後端 API 伺服器。</p>
                 </div>
 
                 <div class="space-y-1.5">
@@ -367,7 +365,7 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">3. 領料紀錄匯入後端 EXCEL API URL <span class="text-emerald-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-300">3. 領料紀錄匯入後端 ERP API URL <span class="text-emerald-400">*</span></label>
                     <input type="url" id="webhookSubmitUrl"
                         class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
                 </div>
@@ -485,9 +483,9 @@
             </form>
 
             <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-500">
-                <span><i class="fa-solid fa-lock mr-1"></i> 多操作員授權驗證通道 (已內建)</span>
+                <span><i class="fa-solid fa-lock mr-1"></i> 多操作員授權驗證通道</span>
                 <button type="button" onclick="openSettingsModal()" class="text-slate-400 hover:text-slate-200 underline flex items-center">
-                    <i class="fa-solid fa-gear mr-1"></i> 檢視 API 網址
+                    <i class="fa-solid fa-gear mr-1"></i> 檢視 API 設定
                 </button>
             </div>
         </div>
@@ -526,7 +524,6 @@
     </div>
 
     <script>
-        // System Global State Variables with Hardcoded n8n Webhook URLs
         let webhookAuthUrl = 'https://learning.n8n.tw/webhook/a9e6f3a6-d119-4421-b141-5959d18f3c86';
         let webhookQueryUrl = 'https://learning.n8n.tw/webhook/bb7ea40d-f797-4ec8-8e3b-6f38972c6eb5';
         let webhookSubmitUrl = 'https://learning.n8n.tw/webhook/a1492fef-4a20-4d35-b376-c7f348eada98';
@@ -536,14 +533,12 @@
         let html5QrCodeScanner = null;
         let lastAutoQueriedBarcode = '';
 
-        // Locked Requisition Header State
         let lockedHeader = {
             shipNo: '',
             jobCode: '',
             recipientId: ''
         };
 
-        // Web Audio & Mobile Vibration Feedback Synthesizer
         let audioCtx = null;
 
         function triggerMobileVibration(pattern = [100]) {
@@ -578,14 +573,14 @@
 
                 if (type === 'success') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.15);
                 } else if (type === 'error') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                     osc.start();
@@ -642,8 +637,6 @@
                 }
 
                 const rawData = await res.json();
-                console.log('n8n Auth Response:', rawData);
-
                 let data = rawData;
                 if (Array.isArray(rawData)) {
                     data = rawData[0];
@@ -1307,7 +1300,7 @@
                 closeEditModal();
                 renderLogs();
                 playBeep('success');
-                showToast('✅ 領料紀錄修改成功，已同步更新至 Excel！', 'success');
+                showToast('✅ 領料紀錄修改成功，已同步更新至 ERP！', 'success');
 
             } catch (err) {
                 playBeep('error');
@@ -1431,9 +1424,7 @@
             showToast('API 設定已更新！', 'success');
         }
 
-        function loadSavedSettings() {
-            // Default URLs are pre-configured
-        }
+        function loadSavedSettings() {}
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -1462,7 +1453,6 @@
             }, 3500);
         }
 
-        // Camera QR/Barcode Scanner Integration
         function startCameraScanner() {
             const cameraModal = document.getElementById('cameraModal');
             if (cameraModal) cameraModal.classList.remove('hidden');
@@ -1483,9 +1473,7 @@
                         queryMaterial();
                     }
                 },
-                (errorMessage) => {
-                    // Scanning active, ignore frame errors
-                }
+                (errorMessage) => {}
             ).catch(err => {
                 console.log("Camera start error:", err);
                 showToast('無法啟動相機，請檢查相機權限或使用手動輸入', 'error');
@@ -1508,7 +1496,6 @@
 
         function handleBarcodeAutoQuery(input) {
             const val = input.value.trim();
-            // Optional auto-trigger if exact barcode lengths match
             if ((val.length === 8 || (val.toUpperCase().startsWith('T') && val.length === 7)) && val !== lastAutoQueriedBarcode) {
                 lastAutoQueriedBarcode = val;
                 queryMaterial();
