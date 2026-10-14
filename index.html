@@ -39,9 +39,12 @@
     </script>
     <style>
         @keyframes pulse-border {
-            0%, 100% {
+
+            0%,
+            100% {
                 border-color: rgba(34, 197, 94, 0.4);
             }
+
             50% {
                 border-color: rgba(34, 197, 94, 1);
             }
@@ -72,7 +75,8 @@
             </div>
 
             <div class="flex items-center space-x-3">
-                <div id="operatorBadge" class="hidden items-center px-3 py-1.5 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                <div id="operatorBadge"
+                    class="hidden items-center px-3 py-1.5 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30">
                     <i class="fa-solid fa-user-shield mr-1.5"></i>
                     <span id="operatorBadgeName">操作員: 授權操作員</span>
                 </div>
@@ -105,71 +109,86 @@
             <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 backdrop-blur-sm">
                 <div class="flex justify-between items-center text-xs font-medium text-slate-400">
                     <div id="step1-indicator" class="flex items-center text-emerald-400 font-bold">
-                        <span class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center mr-2 text-xs">1</span>
+                        <span
+                            class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center mr-2 text-xs">1</span>
                         <span>填寫領用基本資料</span>
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
                     <div id="step2-indicator" class="flex items-center">
-                        <span class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">2</span>
+                        <span
+                            class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">2</span>
                         <span>掃描與核對料號</span>
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
                     <div id="step3-indicator" class="flex items-center">
-                        <span class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">3</span>
+                        <span
+                            class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mr-2 text-xs">3</span>
                         <span>輸入數量與過帳</span>
                     </div>
                 </div>
             </div>
 
-            <div id="stage1Container" class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-4">
+            <div id="stage1Container"
+                class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                     <h2 class="text-base font-semibold text-white flex items-center">
                         <i class="fa-solid fa-circle-user text-emerald-400 mr-2.5"></i> 第一階段：填寫領用基本資料
                     </h2>
-                    <span id="stage1StatusBadge" class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-medium">進行中</span>
+                    <span id="stage1StatusBadge"
+                        class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-medium">進行中</span>
                 </div>
 
                 <form id="headerForm" onsubmit="lockHeaderInfo(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- 1. 船號 -->
                         <div>
-                            <label for="shipNo" class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
+                            <label for="shipNo"
+                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
                                 <span>船號 / 工程號 <span class="text-emerald-400">*</span></span>
-                                <button type="button" onclick="startCameraScanner('shipNo')" class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
+                                <button type="button" onclick="startCameraScanner('shipNo')"
+                                    class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
                             </label>
                             <div class="relative">
-                                <input type="text" id="shipNo" required autofocus autocomplete="off" placeholder="請輸入船號 (滿5碼跳工作代號)"
+                                <input type="text" id="shipNo" required autofocus autocomplete="off"
+                                    placeholder="請輸入船號 (滿5碼跳工作代號)"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     oninput="handleShipNoAutoJump(this)"
                                     onkeydown="handleHeaderKeydown(event, 'jobCode')">
-                                <i class="fa-solid fa-ship absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <i
+                                    class="fa-solid fa-ship absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                             </div>
                         </div>
 
                         <!-- 2. 工作代號 -->
                         <div>
-                            <label for="jobCode" class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
+                            <label for="jobCode"
+                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
                                 <span>工作代號 / 工單號 <span class="text-emerald-400">*</span></span>
-                                <button type="button" onclick="startCameraScanner('jobCode')" class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
+                                <button type="button" onclick="startCameraScanner('jobCode')"
+                                    class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
                             </label>
                             <div class="relative">
-                                <input type="text" id="jobCode" required autocomplete="off" placeholder="請輸入工單號 (滿4碼跳領用人)"
+                                <input type="text" id="jobCode" required autocomplete="off"
+                                    placeholder="請輸入工單號 (滿4碼跳領用人)"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     oninput="handleJobCodeAutoJump(this)"
                                     onkeydown="handleHeaderKeydown(event, 'recipientId')">
-                                <i class="fa-solid fa-briefcase absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <i
+                                    class="fa-solid fa-briefcase absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                             </div>
                         </div>
 
                         <!-- 3. 領用人 -->
                         <div>
-                            <label for="recipientId" class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
+                            <label for="recipientId"
+                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
                                 <span>領用人 / 工號條碼 <span class="text-emerald-400">*</span></span>
-                                <button type="button" onclick="startCameraScanner('recipientId')" class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
+                                <button type="button" onclick="startCameraScanner('recipientId')"
+                                    class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
                             </label>
@@ -177,20 +196,24 @@
                                 <input type="text" id="recipientId" required autocomplete="off" placeholder="請輸入領用人工號"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                                     onkeydown="handleHeaderKeydown(event, 'btnLockHeader')">
-                                <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <i
+                                    class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-2 flex items-center justify-between">
-                        <span class="text-xs text-slate-400"><i class="fa-solid fa-circle-info mr-1 text-emerald-400"></i>確認基本資料後將鎖定欄位以防止誤觸</span>
+                        <span class="text-xs text-slate-400"><i
+                                class="fa-solid fa-circle-info mr-1 text-emerald-400"></i>確認基本資料後將鎖定欄位以防止誤觸</span>
                         <div class="flex items-center space-x-2">
-                            <button type="button" id="btnUnlockHeader" onclick="unlockHeaderInfo()" style="display: none;"
+                            <button type="button" id="btnUnlockHeader" onclick="unlockHeaderInfo()"
+                                style="display: none;"
                                 class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
                                 <i class="fa-solid fa-pen-to-square"></i>
                                 <span>修改基本資料</span>
                             </button>
-                            <button type="button" id="btnNewShipSession" onclick="resetForNewShipSession()" style="display: none;"
+                            <button type="button" id="btnNewShipSession" onclick="resetForNewShipSession()"
+                                style="display: none;"
                                 class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
                                 <i class="fa-solid fa-rotate"></i>
                                 <span>重置作業</span>
@@ -205,7 +228,8 @@
                 </form>
             </div>
 
-            <div id="stage2Container" class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-5 opacity-50 pointer-events-none transition-all">
+            <div id="stage2Container"
+                class="bg-slate-800/90 rounded-2xl p-5 md:p-6 border border-slate-700/80 shadow-xl space-y-5 opacity-50 pointer-events-none transition-all">
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                     <h2 class="text-base font-semibold text-white flex items-center">
                         <i class="fa-solid fa-barcode text-emerald-400 mr-2.5"></i> 第二/三階段：掃描貨品編號與輸入數量
@@ -214,7 +238,8 @@
                 </div>
 
                 <div class="space-y-3">
-                    <label for="itemBarcode" class="block text-sm font-medium text-slate-300 flex items-center justify-between">
+                    <label for="itemBarcode"
+                        class="block text-sm font-medium text-slate-300 flex items-center justify-between">
                         <span>貨品編號 <span class="text-emerald-400">*</span></span>
                         <span class="text-xs text-slate-400 font-normal">支援條碼槍自動辨識、鏡頭掃描或手動輸入</span>
                     </label>
@@ -222,9 +247,9 @@
                         <div class="relative flex-1">
                             <input type="text" id="itemBarcode" autocomplete="off" placeholder="請掃描或輸入貨品編號"
                                 class="w-full bg-slate-900 border-2 border-slate-600 rounded-xl px-4 py-3.5 pl-11 text-lg font-mono text-emerald-300 placeholder-slate-500 focus:outline-none transition-all scanning-animation"
-                                oninput="handleBarcodeAutoQuery(this)"
-                                onkeydown="handleBarcodeKeydown(event)">
-                            <i class="fa-solid fa-qrcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                                oninput="handleBarcodeAutoQuery(this)" onkeydown="handleBarcodeKeydown(event)">
+                            <i
+                                class="fa-solid fa-qrcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                         </div>
 
                         <div class="flex items-center space-x-2">
@@ -242,13 +267,16 @@
                     </div>
                 </div>
 
-                <div id="materialCard" class="hidden bg-slate-900/90 rounded-xl p-4 border border-emerald-500/40 space-y-3 transition-all">
+                <div id="materialCard"
+                    class="hidden bg-slate-900/90 rounded-xl p-4 border border-emerald-500/40 space-y-3 transition-all">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center space-x-2">
-                            <span class="bg-emerald-500 text-slate-950 font-bold px-2.5 py-0.5 rounded text-xs">已核對料號</span>
+                            <span
+                                class="bg-emerald-500 text-slate-950 font-bold px-2.5 py-0.5 rounded text-xs">已核對料號</span>
                             <span id="displayBarcode" class="font-mono text-slate-400 text-sm">#--</span>
                         </div>
-                        <button onclick="resetMaterialStage()" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
+                        <button onclick="resetMaterialStage()"
+                            class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
                             <i class="fa-solid fa-rotate-left mr-1"></i>重新掃描料號
                         </button>
                     </div>
@@ -264,29 +292,35 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-1 border-t border-slate-800">
+                    <div
+                        class="flex items-center justify-between text-xs text-slate-400 px-1 pt-1 border-t border-slate-800">
                         <span>單位：<strong id="displayUnit" class="text-slate-200">個</strong></span>
-                        <span>系統現有庫存：<strong id="displayStock" class="text-emerald-400 font-mono text-sm">--</strong></span>
+                        <span>系統現有庫存：<strong id="displayStock"
+                                class="text-emerald-400 font-mono text-sm">--</strong></span>
                     </div>
                 </div>
 
-                <form id="issueForm" onsubmit="submitMaterialIssue(event)" class="space-y-4 pt-2 border-t border-slate-700/60">
+                <form id="issueForm" onsubmit="submitMaterialIssue(event)"
+                    class="space-y-4 pt-2 border-t border-slate-700/60">
                     <div>
                         <label for="quantity" class="block text-sm font-medium text-slate-300 mb-1.5">
                             領用數量 <span class="text-emerald-400">*</span>
                         </label>
                         <div class="relative flex items-center">
-                            <input type="number" id="quantity" min="1" step="1" required autocomplete="off" placeholder="請輸入領用數量"
-                                oninput="validateQuantity()"
+                            <input type="number" id="quantity" min="1" step="1" required autocomplete="off"
+                                placeholder="請輸入領用數量" oninput="validateQuantity()"
                                 class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 pr-24 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-lg font-mono">
-                            <i class="fa-solid fa-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <i
+                                class="fa-solid fa-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
 
-                            <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center space-x-1 pointer-events-none bg-slate-800 border border-slate-700 text-emerald-400 text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
+                            <div
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center space-x-1 pointer-events-none bg-slate-800 border border-slate-700 text-emerald-400 text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
                                 <span class="text-slate-400 text-[11px]">單位:</span>
                                 <span id="quantityUnit" class="font-mono text-emerald-300">--</span>
                             </div>
                         </div>
-                        <div id="stockWarning" class="hidden mt-2 p-2.5 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-400 text-xs font-semibold flex items-center">
+                        <div id="stockWarning"
+                            class="hidden mt-2 p-2.5 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-400 text-xs font-semibold flex items-center">
                             <i class="fa-solid fa-triangle-exclamation mr-2 text-base flex-shrink-0"></i>
                             <span id="stockWarningText">領用數量已超過系統現有庫存，無法過帳！</span>
                         </div>
@@ -305,7 +339,8 @@
         </div>
 
         <div class="lg:col-span-5 space-y-6">
-            <div class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-xl flex flex-col h-full min-h-[500px]">
+            <div
+                class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-xl flex flex-col h-full min-h-[500px]">
 
                 <div class="flex items-center justify-between pb-4 border-b border-slate-700/60 mb-4">
                     <div class="flex items-center space-x-2">
@@ -321,9 +356,11 @@
                 <div id="logList" class="space-y-3 overflow-y-auto max-h-[580px] pr-1 flex-1">
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between items-center">
+                <div
+                    class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between items-center">
                     <span>每日定時自動轉入 ERP</span>
-                    <button onclick="clearLocalLogs()" class="text-slate-500 hover:text-slate-300 transition-colors">清空畫面紀錄</button>
+                    <button onclick="clearLocalLogs()"
+                        class="text-slate-500 hover:text-slate-300 transition-colors">清空畫面紀錄</button>
                 </div>
 
             </div>
@@ -331,7 +368,8 @@
 
     </main>
 
-    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+    <div id="settingsModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                 <h3 class="text-base font-bold text-white flex items-center">
@@ -351,25 +389,29 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">1. 授權操作密碼 API URL <span class="text-emerald-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-300">1. 授權操作密碼 API URL <span
+                            class="text-emerald-400">*</span></label>
                     <input type="url" id="webhookAuthUrl" autocomplete="off"
                         class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">2. 貨品編號查詢 API URL <span class="text-emerald-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-300">2. 貨品編號查詢 API URL <span
+                            class="text-emerald-400">*</span></label>
                     <input type="url" id="webhookQueryUrl" autocomplete="off"
                         class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">3. 領料紀錄匯入後端 ERP API URL <span class="text-emerald-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-300">3. 領料紀錄匯入後端 ERP API URL <span
+                            class="text-emerald-400">*</span></label>
                     <input type="url" id="webhookSubmitUrl" autocomplete="off"
                         class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">4. 刪除領料紀錄 API URL (已寫死) <span class="text-emerald-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-300">4. 刪除領料紀錄 API URL (已寫死) <span
+                            class="text-emerald-400">*</span></label>
                     <input type="url" id="webhookDeleteUrl" autocomplete="off" readonly
                         class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-400 font-mono focus:outline-none cursor-not-allowed">
                 </div>
@@ -384,7 +426,8 @@
         </div>
     </div>
 
-    <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] flex items-center justify-center p-4 hidden">
+    <div id="editModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                 <h3 class="text-base font-bold text-white flex items-center">
@@ -443,8 +486,10 @@
         </div>
     </div>
 
-    <div id="deleteModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+    <div id="deleteModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] flex items-center justify-center p-4 hidden">
+        <div
+            class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
             <div class="inline-flex p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
                 <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
             </div>
@@ -465,11 +510,16 @@
         </div>
     </div>
 
-    <div id="authModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700/80 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 text-center relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+    <div id="authModal"
+        class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-slate-800 border border-slate-700/80 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 text-center relative overflow-hidden">
+            <div
+                class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none">
+            </div>
 
-            <div class="inline-flex p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-1">
+            <div
+                class="inline-flex p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-1">
                 <i class="fa-solid fa-shield-halved text-3xl"></i>
             </div>
 
@@ -484,7 +534,8 @@
                         操作員專屬密碼 <span class="text-emerald-400">*</span>
                     </label>
                     <div class="relative">
-                        <input type="password" id="systemPassword" autofocus required autocomplete="current-password" placeholder="請輸入操作員密碼"
+                        <input type="password" id="systemPassword" autofocus required autocomplete="current-password"
+                            placeholder="請輸入操作員密碼"
                             class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 pl-11 pr-10 text-white font-mono placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-all">
                         <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                         <button type="button" onclick="togglePasswordVisibility()"
@@ -494,7 +545,8 @@
                     </div>
                 </div>
 
-                <div id="authErrorMsg" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg flex items-center">
+                <div id="authErrorMsg"
+                    class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg flex items-center">
                     <i class="fa-solid fa-circle-exclamation mr-2 text-sm flex-shrink-0"></i>
                     <span id="authErrorText">密碼驗證失敗，請重新輸入！</span>
                 </div>
@@ -508,31 +560,52 @@
 
             <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-500">
                 <span><i class="fa-solid fa-lock mr-1"></i> 多操作員授權驗證通道</span>
-                <button type="button" onclick="openSettingsModal()" class="text-slate-400 hover:text-slate-200 underline flex items-center">
+                <button type="button" onclick="openSettingsModal()"
+                    class="text-slate-400 hover:text-slate-200 underline flex items-center">
                     <i class="fa-solid fa-gear mr-1"></i> 檢視 API 設定
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out pointer-events-none">
-        <div id="toastContent" class="bg-slate-800 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl flex items-center space-x-3">
+    <div id="toast"
+        class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out pointer-events-none">
+        <div id="toastContent"
+            class="bg-slate-800 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl flex items-center space-x-3">
             <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
             <span id="toastMessage" class="text-sm font-medium">通知訊息</span>
         </div>
     </div>
 
-    <div id="cameraModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex flex-col items-center justify-between p-4 hidden">
+    <div id="cameraModal"
+        class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex flex-col items-center justify-between p-4 hidden">
         <div class="w-full max-w-md flex items-center justify-between py-2 text-white border-b border-slate-800">
-            <span id="cameraModalTitle" class="text-sm font-bold flex items-center"><i class="fa-solid fa-camera text-sky-400 mr-2"></i> 條碼掃描</span>
+            <span id="cameraModalTitle" class="text-sm font-bold flex items-center"><i
+                    class="fa-solid fa-camera text-sky-400 mr-2"></i> 條碼掃描</span>
             <button type="button" onclick="stopCameraScanner()" class="p-2 text-slate-400 hover:text-white rounded-lg">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
         <div class="w-full max-w-md my-auto flex flex-col items-center justify-center relative">
-            <div id="reader" class="w-full rounded-2xl overflow-hidden border-2 border-sky-500 shadow-2xl bg-black"></div>
-            <p class="text-xs text-slate-300 mt-3 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-700">
+            <div id="reader" class="w-full rounded-2xl overflow-hidden border-2 border-sky-500 shadow-2xl bg-black">
+            </div>
+
+            <!-- 相機掃描輔助工具列：手電筒補光與 2x 變焦（支援硬體自動顯示） -->
+            <div id="cameraToolsBar" class="flex items-center justify-center space-x-3 mt-3">
+                <button type="button" id="btnScannerTorch" onclick="toggleScannerTorch()"
+                    class="hidden items-center space-x-1.5 px-3.5 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-amber-300 text-xs font-medium rounded-full border border-amber-500/30 transition-all shadow">
+                    <i id="torchIcon" class="fa-solid fa-bolt"></i>
+                    <span id="torchText">開啟手電筒</span>
+                </button>
+                <button type="button" id="btnScannerZoom" onclick="toggleScannerZoom()"
+                    class="hidden items-center space-x-1.5 px-3.5 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-sky-300 text-xs font-medium rounded-full border border-sky-500/30 transition-all shadow">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <span id="zoomText">2x 放大</span>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-300 mt-2 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-700">
                 <i class="fa-solid fa-expand mr-1 text-sky-400"></i> 請將條碼對準中央長條形掃描框
             </p>
         </div>
@@ -555,6 +628,8 @@
         let issueLogs = [];
         let html5QrCodeScanner = null;
         let currentScanTargetField = 'itemBarcode';
+        let isTorchOn = false;
+        let currentZoom = 1;
         let isTransitioningFocus = false;
         let lastFocusTransitionTime = 0;
         let lastAutoQueriedBarcode = '';
@@ -675,9 +750,9 @@
                 const extractedOperator = (data && (data.operator || data.operatorName || data.name || data.username || data.user || data['操作員'] || data['經辦人'])) || '';
 
                 const isSuccess = data && (
-                    data.success === true || 
-                    data.success === 'true' || 
-                    data.success === 1 || 
+                    data.success === true ||
+                    data.success === 'true' ||
+                    data.success === 1 ||
                     data.success === '1' ||
                     (data.message && (String(data.message).includes('成功') || String(data.message).includes('success'))) ||
                     Boolean(extractedOperator)
@@ -693,7 +768,7 @@
                     passwordInput.value = '';
                     playBeep('success');
                     showToast(`歡迎登入，操作員：[${operatorName}]`, 'success');
-                    
+
                     updateOperatorDisplay(operatorName);
                     focusShipNoField();
                 } else {
@@ -801,7 +876,7 @@
                     const shipNo = document.getElementById('shipNo').value.trim();
                     const jobCode = document.getElementById('jobCode').value.trim();
                     const recipientId = document.getElementById('recipientId').value.trim();
-                    
+
                     if (!shipNo || !jobCode || !recipientId) {
                         playBeep('error');
                         showToast('基本資料尚未填寫完整，請填寫完畢後再進行鎖定！', 'warning');
@@ -1092,7 +1167,7 @@
             lastAutoQueriedBarcode = '';
             document.getElementById('materialCard').classList.add('hidden');
             document.getElementById('itemBarcode').value = '';
-            
+
             const qtyInput = document.getElementById('quantity');
             if (qtyInput) {
                 qtyInput.value = '';
@@ -1157,7 +1232,7 @@
             const rawSpecVal = (specVal === '無規格說明') ? '' : specVal;
             const unitVal = currentMaterial['基本單位'] || currentMaterial['單位'] || currentMaterial.unit || 'EA';
             const timestampVal = new Date().toLocaleString('zh-TW', { hour12: false });
-            
+
             const payload = {
                 "時間": timestampVal,
                 "流水號": timestampVal,
@@ -1261,7 +1336,7 @@
 
             const item = issueLogs[index];
             const timestampVal = item['時間'] || item.timestamp || new Date().toLocaleString('zh-TW', { hour12: false });
-            
+
             const barcodeVal = item['貨品編號'] || item.itemBarcode || '';
             const nameVal = item['貨品名稱'] || item['物料名稱'] || item.itemName || '';
             const specVal = item['貨品規格'] || item['規格說明'] || item.itemSpec || '';
@@ -1570,7 +1645,7 @@
             showToast('API 設定已更新！', 'success');
         }
 
-        function loadSavedSettings() {}
+        function loadSavedSettings() { }
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -1599,6 +1674,131 @@
             }, 3500);
         }
 
+        // 條碼影像處理演算法：水平局部自適應光照均勻化（消除手機近距離拍攝時的紙張反光、眩光與陰影）
+        function applyAdaptiveBarcodeEnhancement(data, w, h) {
+            if (w < 20 || h < 20) return;
+            // 視窗寬度取寬度約 12% (一般為 24~40px)，足以平滑背景反光並保留條碼黑白條紋邊緣
+            const win = Math.max(16, Math.min(48, Math.floor(w * 0.12)));
+            const half = win >> 1;
+            const rowLum = new Float32Array(w);
+            const prefix = new Float32Array(w + 1);
+
+            for (let y = 0; y < h; y++) {
+                const rowOffset = y * w * 4;
+                prefix[0] = 0;
+                for (let x = 0; x < w; x++) {
+                    const idx = rowOffset + (x << 2);
+                    // 人眼感知亮度公式：0.299R + 0.587G + 0.114B (快速定點運算)
+                    const lum = (data[idx] * 77 + data[idx + 1] * 150 + data[idx + 2] * 29) >> 8;
+                    rowLum[x] = lum;
+                    prefix[x + 1] = prefix[x] + lum;
+                }
+
+                for (let x = 0; x < w; x++) {
+                    const x1 = x - half < 0 ? 0 : x - half;
+                    const x2 = x + half + 1 > w ? w : x + half + 1;
+                    const avg = (prefix[x2] - prefix[x1]) / (x2 - x1);
+                    const diff = rowLum[x] - avg;
+                    // 對比度放大係數 2.6，拉大條與空的二值化差值
+                    let val = (128 + diff * 2.6) | 0;
+                    if (val < 0) val = 0;
+                    else if (val > 255) val = 255;
+
+                    const idx = rowOffset + (x << 2);
+                    data[idx] = val;
+                    data[idx + 1] = val;
+                    data[idx + 2] = val;
+                }
+            }
+        }
+
+        // 條碼影像處理演算法：全動態對比拉伸（將灰階分佈擴展至 0-255，增強條碼邊緣反差）
+        function applyContrastStretch(data, w, h) {
+            const len = w * h * 4;
+            let min = 255;
+            let max = 0;
+            for (let i = 0; i < len; i += 4) {
+                const lum = (data[i] * 77 + data[i + 1] * 150 + data[i + 2] * 29) >> 8;
+                if (lum < min) min = lum;
+                if (lum > max) max = lum;
+            }
+            const range = max - min;
+            if (range < 25 || range > 235) return;
+            const factor = 255 / range;
+            for (let i = 0; i < len; i += 4) {
+                const lum = (data[i] * 77 + data[i + 1] * 150 + data[i + 2] * 29) >> 8;
+                let val = ((lum - min) * factor) | 0;
+                if (val < 0) val = 0;
+                else if (val > 255) val = 255;
+                data[i] = val;
+                data[i + 1] = val;
+                data[i + 2] = val;
+            }
+        }
+
+        async function checkAndInitCameraControls() {
+            const btnTorch = document.getElementById('btnScannerTorch');
+            const btnZoom = document.getElementById('btnScannerZoom');
+            if (!html5QrCodeScanner) return;
+
+            try {
+                const capabilities = html5QrCodeScanner.getRunningTrackCapabilities();
+                if (capabilities) {
+                    if (capabilities.torch && btnTorch) {
+                        btnTorch.classList.remove('hidden');
+                        btnTorch.classList.add('flex');
+                    }
+                    if (capabilities.zoom && capabilities.zoom.max > 1 && btnZoom) {
+                        btnZoom.classList.remove('hidden');
+                        btnZoom.classList.add('flex');
+                    }
+                }
+            } catch (e) {
+                console.log('Capabilities check error:', e);
+            }
+        }
+
+        async function toggleScannerTorch() {
+            if (!html5QrCodeScanner) return;
+            isTorchOn = !isTorchOn;
+            try {
+                await html5QrCodeScanner.applyVideoConstraints({
+                    advanced: [{ torch: isTorchOn }]
+                });
+                const torchText = document.getElementById('torchText');
+                const torchIcon = document.getElementById('torchIcon');
+                const btnTorch = document.getElementById('btnScannerTorch');
+                if (torchText) torchText.textContent = isTorchOn ? '關閉手電筒' : '開啟手電筒';
+                if (torchIcon) torchIcon.className = isTorchOn ? 'fa-solid fa-bolt-slash text-amber-400' : 'fa-solid fa-bolt text-amber-300';
+                if (btnTorch) {
+                    if (isTorchOn) {
+                        btnTorch.classList.add('bg-amber-500/20', 'border-amber-400');
+                    } else {
+                        btnTorch.classList.remove('bg-amber-500/20', 'border-amber-400');
+                    }
+                }
+            } catch (e) {
+                console.warn('Torch toggle failed:', e);
+                isTorchOn = !isTorchOn;
+            }
+        }
+
+        async function toggleScannerZoom() {
+            if (!html5QrCodeScanner) return;
+            try {
+                const capabilities = html5QrCodeScanner.getRunningTrackCapabilities();
+                const maxZoom = (capabilities && capabilities.zoom && capabilities.zoom.max) ? capabilities.zoom.max : 2;
+                currentZoom = currentZoom === 1 ? Math.min(2, maxZoom) : 1;
+                await html5QrCodeScanner.applyVideoConstraints({
+                    advanced: [{ zoom: currentZoom }]
+                });
+                const zoomText = document.getElementById('zoomText');
+                if (zoomText) zoomText.textContent = currentZoom > 1 ? '1x 還原' : '2x 放大';
+            } catch (e) {
+                console.warn('Zoom toggle failed:', e);
+            }
+        }
+
         function startCameraScanner(targetFieldId = 'itemBarcode') {
             currentScanTargetField = targetFieldId;
             const cameraModal = document.getElementById('cameraModal');
@@ -1614,18 +1814,136 @@
                 titleEl.innerHTML = `<i class="fa-solid fa-camera text-sky-400 mr-2"></i> 掃描 ${fieldName}`;
             }
 
-            if (!html5QrCodeScanner) {
-                html5QrCodeScanner = new Html5Qrcode("reader");
+            // 重置相機控制按鈕
+            isTorchOn = false;
+            currentZoom = 1;
+            const btnTorch = document.getElementById('btnScannerTorch');
+            const btnZoom = document.getElementById('btnScannerZoom');
+            if (btnTorch) { btnTorch.classList.add('hidden'); btnTorch.classList.remove('flex', 'bg-amber-500/20', 'border-amber-400'); }
+            if (btnZoom) { btnZoom.classList.add('hidden'); btnZoom.classList.remove('flex'); }
+            const torchText = document.getElementById('torchText');
+            if (torchText) torchText.textContent = '開啟手電筒';
+            const zoomText = document.getElementById('zoomText');
+            if (zoomText) zoomText.textContent = '2x 放大';
+
+            // 清理舊實例，確保相機與 DOM 每次皆全新初始化
+            if (html5QrCodeScanner) {
+                try {
+                    html5QrCodeScanner.clear();
+                } catch (e) { }
+                html5QrCodeScanner = null;
             }
 
-            const qrConfig = {
-                fps: 25,
-                qrbox: { width: 310, height: 95 },
-                aspectRatio: 1.777778,
+            // 針對倉管環境鎖定條碼格式：聚焦於一維條碼 (Code 128, Code 39, EAN, UPC 等) 與二維碼
+            // 排除罕見/耗能的 2D 格式 (Aztec, PDF417, Data Matrix, MaxiCode)，大幅減少單幀解碼運算負荷達 70%
+            const formatsToSupport = [
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.CODE_93,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.CODABAR,
+                Html5QrcodeSupportedFormats.ITF,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ];
+
+            html5QrCodeScanner = new Html5Qrcode("reader", {
+                formatsToSupport: formatsToSupport,
+                useBarCodeDetectorIfSupported: true,
                 experimentalFeatures: {
                     useBarCodeDetectorIfSupported: true
+                },
+                verbose: false
+            });
+
+            // 強化型多階段解碼演算法：攔截 scanContext
+            // 當原始相機影格因反光、眩光或陰影無法解碼時，立即自動執行水平局部光照均勻化與對比拉伸二次/三次辨識
+            const origScanContext = html5QrCodeScanner.scanContext ? html5QrCodeScanner.scanContext.bind(html5QrCodeScanner) : null;
+            if (origScanContext) {
+                html5QrCodeScanner.scanContext = function (onSuccess, onError) {
+                    if (this.stateManagerProxy && this.stateManagerProxy.isPaused()) {
+                        return Promise.resolve(false);
+                    }
+                    const canvas = this.canvasElement;
+                    if (!canvas || !this.qrcode) {
+                        return origScanContext(onSuccess, onError);
+                    }
+
+                    // 第 1 階段：原始清晰影格快速解碼
+                    return this.qrcode.decodeAsync(canvas).then((res) => {
+                        onSuccess(res.text, res);
+                        this.possiblyUpdateShaders(true);
+                        return true;
+                    }).catch((firstErr) => {
+                        // 第 2 階段：自適應水平光照補償（消除燈光反射、紙張眩光）
+                        try {
+                            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                            if (!ctx) {
+                                this.possiblyUpdateShaders(false);
+                                if (onError) onError(firstErr);
+                                return false;
+                            }
+                            const w = canvas.width;
+                            const h = canvas.height;
+                            const imgData = ctx.getImageData(0, 0, w, h);
+                            const rawPixels = new Uint8ClampedArray(imgData.data);
+
+                            applyAdaptiveBarcodeEnhancement(imgData.data, w, h);
+                            ctx.putImageData(imgData, 0, 0);
+
+                            return this.qrcode.decodeAsync(canvas).then((res) => {
+                                onSuccess(res.text, res);
+                                this.possiblyUpdateShaders(true);
+                                return true;
+                            }).catch(() => {
+                                // 第 3 階段：全動態對比拉伸
+                                imgData.data.set(rawPixels);
+                                applyContrastStretch(imgData.data, w, h);
+                                ctx.putImageData(imgData, 0, 0);
+
+                                return this.qrcode.decodeAsync(canvas).then((res) => {
+                                    onSuccess(res.text, res);
+                                    this.possiblyUpdateShaders(true);
+                                    return true;
+                                }).catch((finalErr) => {
+                                    this.possiblyUpdateShaders(false);
+                                    if (onError) onError(finalErr);
+                                    return false;
+                                });
+                            });
+                        } catch (enhancementErr) {
+                            this.possiblyUpdateShaders(false);
+                            if (onError) onError(firstErr);
+                            return false;
+                        }
+                    });
+                };
+            }
+
+            // 最適化手機相機參數與一維條碼掃描取景框演算法
+            const qrConfig = {
+                fps: 12, // 降為 12 FPS，避免手機 CPU/GPU 滿載過熱與影格堆疊延遲，給予演算法充裕解析時間
+                qrbox: function (viewfinderWidth, viewfinderHeight) {
+                    // 取景框寬度設為 88% (上限 360px)，保留足夠靜區 (Quiet Zone) 避免條碼邊界被裁切
+                    const width = Math.min(Math.floor(viewfinderWidth * 0.88), 360);
+                    // 取景框高度增至 ~150px (約 45%)，容許手持條碼 15°~20° 傾斜與手震，同時精準鎖定單一條碼行
+                    const height = Math.min(Math.floor(viewfinderHeight * 0.45), 150);
+                    return { width, height };
+                },
+                videoConstraints: {
+                    facingMode: "environment",
+                    width: { min: 640, ideal: 1280, max: 1920 }, // 請求 720p/1080p 高清解析度，確保細線條碼畫素不模糊
+                    height: { min: 480, ideal: 720, max: 1080 },
+                    advanced: [{ focusMode: "continuous" }]      // 啟用連續自動對焦
                 }
             };
+
+            // 手機直向模式不硬套 16:9 比例，避免座標對齊失真
+            if (window.innerWidth > window.innerHeight) {
+                qrConfig.aspectRatio = 1.777778;
+            }
 
             html5QrCodeScanner.start(
                 { facingMode: "environment" },
@@ -1649,8 +1967,10 @@
                         }
                     }
                 },
-                (errorMessage) => {}
-            ).catch(err => {
+                (errorMessage) => { }
+            ).then(() => {
+                checkAndInitCameraControls();
+            }).catch(err => {
                 console.log("Camera start error:", err);
                 showToast('無法啟動相機，請檢查相機權限或使用手動輸入', 'error');
                 stopCameraScanner();
@@ -1661,9 +1981,18 @@
             const cameraModal = document.getElementById('cameraModal');
             if (cameraModal) cameraModal.classList.add('hidden');
 
+            isTorchOn = false;
+            currentZoom = 1;
+            const btnTorch = document.getElementById('btnScannerTorch');
+            const btnZoom = document.getElementById('btnScannerZoom');
+            if (btnTorch) btnTorch.classList.add('hidden');
+            if (btnZoom) btnZoom.classList.add('hidden');
+
             if (html5QrCodeScanner) {
-                html5QrCodeScanner.stop().then(() => {
-                    html5QrCodeScanner.clear();
+                const scanner = html5QrCodeScanner;
+                html5QrCodeScanner = null;
+                scanner.stop().then(() => {
+                    scanner.clear();
                 }).catch(err => {
                     console.log("Camera stop error:", err);
                 });
