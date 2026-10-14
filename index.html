@@ -62,41 +62,51 @@
 
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
-    <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 sticky top-0 z-30 shadow-md">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/30">
-                    <i class="fa-solid fa-boxes-packing text-xl"></i>
+    <header class="bg-slate-800 border-b border-slate-700 px-3.5 py-2.5 sm:px-4 sm:py-3 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+            <!-- 標題與圖示 -->
+            <div class="flex items-center justify-between sm:justify-start">
+                <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                    <div
+                        class="bg-emerald-500/20 text-emerald-400 p-2 sm:p-2.5 rounded-xl border border-emerald-500/30 flex-shrink-0">
+                        <i class="fa-solid fa-boxes-packing text-lg sm:text-xl"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg font-bold text-white tracking-wide truncate">智慧倉管領料作業系統</h1>
+                        <p class="hidden sm:block text-xs text-slate-400 truncate">多操作員授權 ➔ 基本資料輸入 ➔ 條碼掃描 ➔ 數量過帳</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white tracking-wide">智慧倉管領料作業系統</h1>
-                    <p class="text-xs text-slate-400">多操作員授權 ➔ 基本資料輸入 ➔ 條碼掃描 ➔ 數量過帳</p>
-                </div>
+
+                <!-- 手機版鎖定按鈕置於右上角 -->
+                <button onclick="lockSystem()"
+                    class="sm:hidden p-2 text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors border border-amber-500/30 flex-shrink-0"
+                    title="鎖定系統 / 切換操作員">
+                    <i class="fa-solid fa-lock text-sm"></i>
+                </button>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <div id="operatorBadge"
-                    class="hidden items-center px-3 py-1.5 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30">
-                    <i class="fa-solid fa-user-shield mr-1.5"></i>
-                    <span id="operatorBadgeName">操作員: 授權操作員</span>
+            <!-- 狀態標籤列與按鈕 -->
+            <div class="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3">
+                <div class="flex items-center space-x-2 overflow-x-auto py-0.5">
+                    <div id="operatorBadge"
+                        class="hidden items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-user-shield mr-1.5 text-[11px]"></i>
+                        <span id="operatorBadgeName">操作員: 授權操作員</span>
+                    </div>
+
+                    <div id="modeBadge"
+                        class="flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap flex-shrink-0">
+                        <span id="modeStatusDot"
+                            class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                        <span id="modeText">正式生產營運模式</span>
+                    </div>
                 </div>
 
-                <div id="modeBadge"
-                    class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    <span id="modeStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-                    <span id="modeText">正式生產營運模式</span>
-                </div>
-
+                <!-- 電腦版鎖定按鈕 -->
                 <button onclick="lockSystem()"
-                    class="p-2 text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors border border-amber-500/30"
+                    class="hidden sm:inline-flex p-2 text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors border border-amber-500/30 flex-shrink-0"
                     title="鎖定系統 / 切換操作員">
                     <i class="fa-solid fa-lock text-base"></i>
-                </button>
-
-                <button onclick="openSettingsModal()"
-                    class="p-2 text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors border border-slate-600/50"
-                    title="API 連線設定">
-                    <i class="fa-solid fa-gear text-base"></i>
                 </button>
             </div>
         </div>
@@ -142,14 +152,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- 1. 船號 -->
                         <div>
-                            <label for="shipNo"
-                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
-                                <span>船號 / 工程號 <span class="text-emerald-400">*</span></span>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="shipNo" class="block text-sm font-medium text-slate-300">
+                                    船號 / 工程號 <span class="text-emerald-400">*</span>
+                                </label>
                                 <button type="button" onclick="startCameraScanner('shipNo')"
                                     class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
-                            </label>
+                            </div>
                             <div class="relative">
                                 <input type="text" id="shipNo" required autofocus autocomplete="off"
                                     placeholder="請輸入船號 (滿5碼跳工作代號)"
@@ -163,14 +174,15 @@
 
                         <!-- 2. 工作代號 -->
                         <div>
-                            <label for="jobCode"
-                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
-                                <span>工作代號 / 工單號 <span class="text-emerald-400">*</span></span>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="jobCode" class="block text-sm font-medium text-slate-300">
+                                    工作代號 / 工單號 <span class="text-emerald-400">*</span>
+                                </label>
                                 <button type="button" onclick="startCameraScanner('jobCode')"
                                     class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
-                            </label>
+                            </div>
                             <div class="relative">
                                 <input type="text" id="jobCode" required autocomplete="off"
                                     placeholder="請輸入工單號 (滿4碼跳領用人)"
@@ -184,14 +196,15 @@
 
                         <!-- 3. 領用人 -->
                         <div>
-                            <label for="recipientId"
-                                class="block text-sm font-medium text-slate-300 mb-1.5 flex items-center justify-between">
-                                <span>領用人 / 工號條碼 <span class="text-emerald-400">*</span></span>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="recipientId" class="block text-sm font-medium text-slate-300">
+                                    領用人 / 工號條碼 <span class="text-emerald-400">*</span>
+                                </label>
                                 <button type="button" onclick="startCameraScanner('recipientId')"
                                     class="text-xs text-sky-400 hover:text-sky-300 flex items-center space-x-1 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30">
                                     <i class="fa-solid fa-camera text-[10px]"></i><span>掃描</span>
                                 </button>
-                            </label>
+                            </div>
                             <div class="relative">
                                 <input type="text" id="recipientId" required autocomplete="off" placeholder="請輸入領用人工號"
                                     class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-3 pl-10 text-lg font-mono text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
@@ -368,63 +381,6 @@
 
     </main>
 
-    <div id="settingsModal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-plug text-emerald-400 mr-2"></i> API Webhook 設定
-                </h3>
-                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4 text-sm">
-                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/80 space-y-1">
-                    <p class="font-medium text-emerald-400 text-xs flex items-center">
-                        <i class="fa-solid fa-shield-check mr-1.5"></i> 正式生產環境連線端點
-                    </p>
-                    <p class="text-[11px] text-slate-400">系統已連接至正式後端 API 伺服器。</p>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">1. 授權操作密碼 API URL <span
-                            class="text-emerald-400">*</span></label>
-                    <input type="url" id="webhookAuthUrl" autocomplete="off"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">2. 貨品編號查詢 API URL <span
-                            class="text-emerald-400">*</span></label>
-                    <input type="url" id="webhookQueryUrl" autocomplete="off"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">3. 領料紀錄匯入後端 ERP API URL <span
-                            class="text-emerald-400">*</span></label>
-                    <input type="url" id="webhookSubmitUrl" autocomplete="off"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-300">4. 刪除領料紀錄 API URL (已寫死) <span
-                            class="text-emerald-400">*</span></label>
-                    <input type="url" id="webhookDeleteUrl" autocomplete="off" readonly
-                        class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-400 font-mono focus:outline-none cursor-not-allowed">
-                </div>
-            </div>
-
-            <div class="pt-2 flex justify-end space-x-2">
-                <button onclick="saveSettings()"
-                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">
-                    儲存更新設定
-                </button>
-            </div>
-        </div>
-    </div>
 
     <div id="editModal"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] flex items-center justify-center p-4 hidden">
@@ -558,12 +514,8 @@
                 </button>
             </form>
 
-            <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-500">
-                <span><i class="fa-solid fa-lock mr-1"></i> 多操作員授權驗證通道</span>
-                <button type="button" onclick="openSettingsModal()"
-                    class="text-slate-400 hover:text-slate-200 underline flex items-center">
-                    <i class="fa-solid fa-gear mr-1"></i> 檢視 API 設定
-                </button>
+            <div class="pt-2 border-t border-slate-700/60 flex items-center justify-center text-[11px] text-slate-500">
+                <span><i class="fa-solid fa-lock mr-1"></i> 多操作員授權驗證通道 (正式營運版)</span>
             </div>
         </div>
     </div>
@@ -1624,27 +1576,9 @@
             if (s3) s3.className = 'flex items-center ' + (step >= 3 ? 'text-emerald-400 font-bold' : 'text-slate-500');
         }
 
-        function openSettingsModal() {
-            document.getElementById('webhookAuthUrl').value = webhookAuthUrl;
-            document.getElementById('webhookQueryUrl').value = webhookQueryUrl;
-            document.getElementById('webhookSubmitUrl').value = webhookSubmitUrl;
-            document.getElementById('webhookDeleteUrl').value = webhookDeleteUrl;
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.add('hidden');
-        }
-
-        function saveSettings() {
-            webhookAuthUrl = document.getElementById('webhookAuthUrl').value.trim();
-            webhookQueryUrl = document.getElementById('webhookQueryUrl').value.trim();
-            webhookSubmitUrl = document.getElementById('webhookSubmitUrl').value.trim();
-
-            closeSettingsModal();
-            showToast('API 設定已更新！', 'success');
-        }
-
+        function openSettingsModal() { }
+        function closeSettingsModal() { }
+        function saveSettings() { }
         function loadSavedSettings() { }
 
         function showToast(message, type = 'success') {
@@ -1952,13 +1886,30 @@
                     stopCameraScanner();
                     const targetInput = document.getElementById(currentScanTargetField);
                     if (targetInput) {
-                        targetInput.value = decodedText;
+                        const cleanVal = (decodedText || '').trim();
+                        targetInput.value = cleanVal;
+                        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
                         playBeep('success');
 
                         if (currentScanTargetField === 'shipNo') {
-                            handleShipNoAutoJump(targetInput);
+                            const jobCodeInput = document.getElementById('jobCode');
+                            if (jobCodeInput) {
+                                isTransitioningFocus = true;
+                                lastFocusTransitionTime = Date.now();
+                                jobCodeInput.focus();
+                                if (jobCodeInput.select) jobCodeInput.select();
+                                setTimeout(() => { isTransitioningFocus = false; }, 350);
+                            }
                         } else if (currentScanTargetField === 'jobCode') {
-                            handleJobCodeAutoJump(targetInput);
+                            // 工作代號掃描完成：不論條碼長度為何，立即自動平滑跳轉至下一欄位「領用人」
+                            const recipientInput = document.getElementById('recipientId');
+                            if (recipientInput) {
+                                isTransitioningFocus = true;
+                                lastFocusTransitionTime = Date.now();
+                                recipientInput.focus();
+                                if (recipientInput.select) recipientInput.select();
+                                setTimeout(() => { isTransitioningFocus = false; }, 350);
+                            }
                         } else if (currentScanTargetField === 'recipientId') {
                             const btnLock = document.getElementById('btnLockHeader');
                             if (btnLock) btnLock.focus();
